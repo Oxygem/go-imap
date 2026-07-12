@@ -59,6 +59,8 @@ type SearchCriteria struct {
 	Or  [][2]SearchCriteria
 
 	ModSeq *SearchCriteriaModSeq // requires CONDSTORE
+
+	GmailRaw string // requires X-GM-EXT-1 (Gmail): raw Gmail search syntax
 }
 
 // And intersects two search criteria.
@@ -87,6 +89,13 @@ func (criteria *SearchCriteria) And(other *SearchCriteria) {
 
 	criteria.Not = append(criteria.Not, other.Not...)
 	criteria.Or = append(criteria.Or, other.Or...)
+
+	switch {
+	case criteria.GmailRaw == "":
+		criteria.GmailRaw = other.GmailRaw
+	case other.GmailRaw != "":
+		criteria.GmailRaw += " " + other.GmailRaw
+	}
 }
 
 func intersectSince(t1, t2 time.Time) time.Time {
