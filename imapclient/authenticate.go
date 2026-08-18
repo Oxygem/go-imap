@@ -76,7 +76,12 @@ type authenticateCommand struct {
 }
 
 func (c *Client) writeSASLResp(resp []byte) error {
-	respStr := internal.EncodeSASL(resp)
+	// Ignore blank lines here which Google returns for errors, see:
+	// https://developers.google.com/workspace/gmail/imap/xoauth2-protocol
+	var respStr string
+	if len(resp) > 0 {
+		respStr = internal.EncodeSASL(resp)
+	}
 	if _, err := c.bw.WriteString(respStr + "\r\n"); err != nil {
 		return err
 	}
